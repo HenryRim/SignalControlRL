@@ -1,0 +1,38 @@
+<routes>
+    <flow id="01" type="Car" begin="0" end="7200" number="1200" from="edge1-0" to="edge0-2" departPos="1" departLane="best" departSpeed="5.0"/>
+    <flow id="02" type="Car" begin="0" end="7200" number="1200" from="edge2-0" to="edge0-1" departPos="2" departLane="best" departSpeed="5.0"/>
+    <flow id="03" type="Car" begin="0" end="7200" number="700" from="edge3-0" to="edge0-4" departPos="3" departLane="best" departSpeed="5.0"/>
+    <flow id="04" type="Car" begin="0" end="7200" number="700" from="edge4-0" to="edge0-3" departPos="4" departLane="best" departSpeed="5.0"/>
+
+    <flow id="09" type="Car" begin="0" end="7200" number="300" from="edge1-0" to="edge0-3" departPos="1" departLane="best" departSpeed="5.0"/>
+    <flow id="10" type="Car" begin="0" end="7200" number="300" from="edge1-0" to="edge0-4" departPos="1" departLane="best" departSpeed="5.0"/>
+    <flow id="11" type="Car" begin="0" end="7200" number="300" from="edge2-0" to="edge0-3" departPos="2" departLane="best" departSpeed="5.0"/>
+    <flow id="12" type="Car" begin="0" end="7200" number="300" from="edge2-0" to="edge0-4" departPos="2" departLane="best" departSpeed="5.0"/>
+    <flow id="13" type="Car" begin="0" end="7200" number="200" from="edge3-0" to="edge0-1" departPos="3" departLane="best" departSpeed="5.0"/>
+    <flow id="14" type="Car" begin="0" end="7200" number="200" from="edge3-0" to="edge0-2" departPos="3" departLane="best" departSpeed="5.0"/>
+    <flow id="15" type="Car" begin="0" end="7200" number="200" from="edge4-0" to="edge0-1" departPos="4" departLane="best" departSpeed="5.0"/>
+    <flow id="16" type="Car" begin="0" end="7200" number="200" from="edge4-0" to="edge0-2" departPos="4" departLane="best" departSpeed="5.0"/>
+
+    <!--
+    <flow id="01" type="Car" begin="0" end="7200" number="700" from="edge1-0" to="edge0-2" departPos="1" departLane="best" departSpeed="5.0"/>
+    <flow id="02" type="Car" begin="0" end="7200" number="700" from="edge2-0" to="edge0-1" departPos="2" departLane="best" departSpeed="5.0"/>
+    <flow id="03" type="Car" begin="0" end="7200" number="700" from="edge3-0" to="edge0-4" departPos="3" departLane="best" departSpeed="5.0"/>
+    <flow id="04" type="Car" begin="0" end="7200" number="700" from="edge4-0" to="edge0-3" departPos="4" departLane="best" departSpeed="5.0"/>
+
+    <flow id="09" type="Car" begin="0" end="7200" number="300" from="edge1-0" to="edge0-3" departPos="1" departLane="best" departSpeed="5.0"/>
+    <flow id="10" type="Car" begin="0" end="7200" number="300" from="edge1-0" to="edge0-4" departPos="1" departLane="best" departSpeed="5.0"/>
+    <flow id="11" type="Car" begin="0" end="7200" number="300" from="edge2-0" to="edge0-3" departPos="2" departLane="best" departSpeed="5.0"/>
+    <flow id="12" type="Car" begin="0" end="7200" number="300" from="edge2-0" to="edge0-4" departPos="2" departLane="best" departSpeed="5.0"/>
+    <flow id="13" type="Car" begin="0" end="7200" number="300" from="edge3-0" to="edge0-1" departPos="3" departLane="best" departSpeed="5.0"/>
+    <flow id="14" type="Car" begin="0" end="7200" number="300" from="edge3-0" to="edge0-2" departPos="3" departLane="best" departSpeed="5.0"/>
+    <flow id="15" type="Car" begin="0" end="7200" number="300" from="edge4-0" to="edge0-1" departPos="4" departLane="best" departSpeed="5.0"/>
+    <flow id="16" type="Car" begin="0" end="7200" number="300" from="edge4-0" to="edge0-2" departPos="4" departLane="best" departSpeed="5.0"/>
+
+
+    <flow id="05" type="Car" begin="1000" end="3000" number="300" from="edge1-0" to="edge0-2" departPos="1" departLane="best" departSpeed="5.0"/>
+    <flow id="07" type="Car" begin="1500" end="4000" number="300" from="edge4-0" to="edge0-3" departPos="4" departLane="best" departSpeed="5.0"/>
+    <flow id="06" type="Car" begin="2000" end="3000" number="200" from="edge3-0" to="edge0-4" departPos="3" departLane="best" departSpeed="5.0"/>
+    <flow id="08" type="Car" begin="3000" end="4000" number="300" from="edge2-0" to="edge0-1" departPos="2" departLane="best" departSpeed="5.0"/>
+    -->
+
+</routes>
