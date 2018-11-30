@@ -681,7 +681,7 @@ def get_status_img(current_phase,tl_node_id=node_light_7,area_length=600):
 
 def set_yellow(dic_vehicles,rewards_info_dict,f_log_rewards,f_log_outputs,current_phase,current_phase_duration,rewards_detail_dict_list,node_id="node0"):
     Yellow = "yyyyyyyyyyyyyyyy"
-    for i in range(3):
+    for i in range(4):
         timestamp = traci.simulation.getCurrentTime() / 1000
         traci.trafficlights.setRedYellowGreenState(node_id, Yellow)
         traci.simulationStep()
