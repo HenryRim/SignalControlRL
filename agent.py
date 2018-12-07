@@ -24,10 +24,10 @@ class State(object):
     D_TIME_THIS_PHASE = (1,)
     D_IF_TERMINAL = (1,)
     D_HISTORICAL_TRAFFIC = (6,)
+    #HR - Add CTT state
     D_CUMULATIVE_TRAVEL_TIME = (12,)
 
     # ==========================
-
     def __init__(self,
                  queue_length, num_of_vehicles, waiting_time, map_feature,
                  cur_phase,
@@ -47,6 +47,7 @@ class State(object):
 
         self.if_terminal = if_terminal
 
+        #HR - create CTT value
         self.cumulative_travel_time = cumulative_travel_time
 
         self.historical_traffic = None

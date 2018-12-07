@@ -68,6 +68,7 @@ class TrafficLightDQN:
 
     def __init__(self, memo, f_prefix):
 
+
         self.path_set = self.PathSet(os.path.join("conf", memo),
                                      os.path.join("data", memo),
                                      os.path.join("records", memo, f_prefix),
@@ -163,7 +164,7 @@ class TrafficLightDQN:
         # initialize output streams
         file_name_memory = os.path.join(self.path_set.PATH_TO_OUTPUT, "memories.txt")
 
-        # initialize vehicle trajectory output streams
+        # HR - initialize vehicle trajectory output streams
         file_name_trajectory = os.path.join(self.path_set.PATH_TO_OUTPUT, "trajectory.txt")
 
         # start sumo
@@ -257,6 +258,6 @@ def main(memo, f_prefix, sumo_cmd_str, sumo_cmd_pretrain_str):
 
     player = TrafficLightDQN(memo, f_prefix)
     player.set_traffic_file()
-    player.train(sumo_cmd_pretrain_str, if_pretrain=True, use_average=True)
+#    player.train(sumo_cmd_pretrain_str, if_pretrain=True, use_average=True)
     player.train(sumo_cmd_str, if_pretrain=False, use_average=False)
 

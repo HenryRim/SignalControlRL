@@ -97,32 +97,21 @@ min_phase_time_7 = [10, 35]
 node_light_7 = "node0"
 phases_light_7 = ["WNG_ESG_EWG_WEG_WSG_ENG", "NSG_NEG_SNG_SWG_NWG_SEG"]
 
-#original
+#original - phase sequence
 #WNG_ESG_EWG_WEG_WSG_ENG = "grrr gGGG grrr gGGG".replace(" ", "")
 #NSG_NEG_SNG_SWG_NWG_SEG = "gGGG grrr gGGG grrr".replace(" ", "")
 #controlSignal = (WNG_ESG_EWG_WEG_WSG_ENG, NSG_NEG_SNG_SWG_NWG_SEG)
 
-#HR-nema phase
+#HR - nema phase
 # N E S W
-
 WNG_WSG_ESG_ENG_NWG_SEG = "grrr grrG grrr grrG".replace(" ", "")
 WEG_WSG_EWG_ENG_NWG_SEG = "grrr gGGr grrr gGGr".replace(" ", "")
 NEG_NWG_SWG_SEG_WSG_ENG = "grrG grrr grrG grrr".replace(" ", "")
 NSG_NWG_SNG_SEG_WSG_ENG = "gGGr grrr gGGr grrr".replace(" ", "")
-
-"""
-WNG_WSG_ESG_ENG_NWG_SEG = "rrrr rrrr rrrr rrrr".replace(" ", "")
-WEG_WSG_EWG_ENG_NWG_SEG = "rrrr rrrr rrrr rrrr".replace(" ", "")
-NEG_NWG_SWG_SEG_WSG_ENG = "rrrr rrrr rrrr rrrr".replace(" ", "")
-NSG_NWG_SNG_SEG_WSG_ENG = "rrrr rrrr rrrr rrrr".replace(" ", "")
-"""
 controlSignal = (WNG_WSG_ESG_ENG_NWG_SEG, WEG_WSG_EWG_ENG_NWG_SEG, NEG_NWG_SWG_SEG_WSG_ENG, NSG_NWG_SNG_SEG_WSG_ENG)
 
 listLanes=['edge1-0_0','edge1-0_1','edge1-0_2','edge2-0_0','edge2-0_1','edge2-0_2',
                                  'edge3-0_0','edge3-0_1','edge3-0_2','edge4-0_0','edge4-0_1','edge4-0_2']
-
-listLanes2=['edge0-1_0','edge0-1_1','edge0-1_2','edge0-2_0','edge0-2_1','edge0-2_2',
-                                 'edge0-3_0','edge0-3_1','edge0-3_2','edge0-4_0','edge0-4_1','edge0-4_2']
 
 
 '''
@@ -136,6 +125,7 @@ output:
 
 def start_sumo(sumo_cmd_str):
     traci.start(sumo_cmd_str)
+    #HR - set the initial signal as WE thru
     traci.trafficlights.setRedYellowGreenState(node_light_7, controlSignal[0])
     for i in range(20):
         traci.simulationStep()
@@ -270,7 +260,7 @@ def changeTrafficLight_7(current_phase=0):  # [WNG_ESG_WSG_ENG_NWG_SEG]
     traci.trafficlights.setRedYellowGreenState(node_light_7, controlSignal[next_phase])
     return next_phase, next_phase_time_eclipsed
 
-
+#HR - Do not keep the phase sequence
 def changeTrafficLight_7_HR(action=0):
 
     next_phase = action
@@ -369,7 +359,7 @@ def log_rewards(vehicle_dict, action, rewards_info_dict, file_name, timestamp, r
                        "WaitingTime1-0,WaitingTime0-1,WaitingTime2-0,WaitingTime0-2," \
                        "WaitingTime3-0,WaitingTime0-3,WaitingTime4-0,WaitingTime0-4," \
                        "CTT1-0,CTT2-0,CTT3-0,CTT4-0" + '\n'"""
-
+#HR - function to print outputs
 def log_outputs(vehicle_dict, current_phase, current_phase_duration, timestamp, file_name):
 
     listApproach1_0 = ['edge1-0_0', 'edge1-0_1']
@@ -448,6 +438,7 @@ def get_rewards_from_sumo(vehicle_dict, action, rewards_info_dict,
     reward_detail_dict['duration'].append(get_travel_time_duration(vehicle_dict, vehicle_id_entering_list))
     reward_detail_dict['flickering'].append(get_flickering(action))
     reward_detail_dict['partial_duration'].append(get_partial_travel_time_duration(vehicle_dict, vehicle_id_entering_list))
+    #HR - add CTT value to the reward
     reward_detail_dict['cumulative_travel_time'].append(get_overall_CTT(vehicle_dict, listLanes))
     vehicle_id_list = traci.vehicle.getIDList()
     reward_detail_dict['num_of_vehicles_in_system'] = [False, 0, len(vehicle_id_list)]
@@ -477,18 +468,21 @@ def get_rewards_from_dict_list(rewards_detail_dict_list):
     reward = restrict_reward(reward)
     return reward
 
+# HR - Add
 def get_overall_vehicle_number(listLanes):
     overall_vehicle_number = 0
     for lane in listLanes:
         overall_vehicle_number += traci.lane.getLastStepVehicleNumber(lane)
     return overall_vehicle_number
 
+# HR - Add
 def get_average_speed(listLanes):
     average_speed = 0
     for lane in listLanes:
         average_speed += traci.lane.getLastStepMeanSpeed(lane)
     return average_speed/len(listLanes)
 
+# HR - Add
 def get_travel_time(listLanes):
     travel_time = 0
     for lane in listLanes:
@@ -507,7 +501,7 @@ def get_overall_waiting_time(listLanes):
         overall_waiting_time += traci.lane.getWaitingTime(str(lane)) / 60.0
     return overall_waiting_time
 
-# HR Added
+# HR - Calculate CTT
 def get_overall_CTT(rewards_detail_dict_list, listLanes):
     overall_CTT = 0
     for lane in listLanes:
@@ -594,10 +588,12 @@ def update_vehicles_state(dic_vehicles):
 
     return dic_vehicles
 
+
 def status_calculator(dic_vehicles='false'):
     laneQueueTracker=[]
     laneNumVehiclesTracker=[]
     laneWaitingTracker=[]
+    # HR - CTT
     laneCTTTracker=[]
     #================= COUNT HALTED VEHICLES (I.E. QUEUE SIZE) (12 elements)
     for lane in listLanes:
@@ -614,7 +610,7 @@ def status_calculator(dic_vehicles='false'):
     # ================ get position matrix of vehicles on lanes
     mapOfCars = getMapOfVehicles(area_length=area_length)
 
-    # ================ cumulative travel time in lane
+    # HR ================ cumulative travel time in lane
     for lane in listLanes:
         overall_CTT = 0
         for vID in traci.lane.getLastStepVehicleIDs(str(lane)):
@@ -700,7 +696,7 @@ def set_all_red(dic_vehicles,rewards_info_dict,f_log_rewards,f_log_outputs,curre
         log_outputs(dic_vehicles, current_phase, current_phase_duration, timestamp, f_log_outputs)
         update_vehicles_state(dic_vehicles)
 
-
+# HR - Intellilight's original function
 """
 def run(action, current_phase, current_phase_duration, vehicle_dict, rewards_info_dict, f_log_rewards, f_log_outputs, rewards_detail_dict_list,node_id="node0"):
     return_phase = current_phase
@@ -761,7 +757,7 @@ def phase_vector_to_number(phase_vector,phases_light=phases_light_7):
         raise ("Phase vector %s is not in phases_light %s"%(phase_vector,str(phase_vector_7)))
 
 
-#HR-
+# HR -
 def get_all_vehicle_info():
     simTime = traci.simulation.getCurrentTime() / 1000
     vehicleIDs = traci.vehicle.getIDList()

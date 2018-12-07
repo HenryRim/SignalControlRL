@@ -66,7 +66,7 @@ class SumoAgent:
         self.update_vehicles()
 
         self.f_log_rewards = os.path.join(self.path_set.PATH_TO_OUTPUT, "log_rewards.txt")
-        #HR - Added to log output
+        # HR - Added to log output
         self.f_log_outputs = os.path.join(self.path_set.PATH_TO_OUTPUT, "log_outputs.txt")
 
         if not os.path.exists(self.f_log_rewards):
@@ -111,7 +111,7 @@ class SumoAgent:
     def get_current_phase(self):
         return self.current_phase
 
-    #HR Original
+    # HR Original
     """
     def take_action(self, action):
         current_phase_number = self.get_current_phase()
@@ -140,7 +140,7 @@ class SumoAgent:
         return reward, action
     """
 
-    #HR - Changed
+    # HR - Changed
     def take_action(self, action):
         current_phase_number = self.get_current_phase()
         rewards_detail_dict_list = []
@@ -197,7 +197,7 @@ class SumoAgent:
 
     def update_state(self, dic_vehicles='false'):
         status_tracker = map_computor.status_calculator(dic_vehicles=dic_vehicles)
-
+        # HR - Add CTT
         self.state = State(
             queue_length=np.reshape(np.array(status_tracker[0]), newshape=(1, 12)),
             num_of_vehicles=np.reshape(np.array(status_tracker[1]), newshape=(1, 12)),
