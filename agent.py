@@ -24,7 +24,7 @@ class State(object):
     D_TIME_THIS_PHASE = (1,)
     D_IF_TERMINAL = (1,)
     D_HISTORICAL_TRAFFIC = (6,)
-    #HR - Add CTT state
+    # HR - Add CTT state
     D_CUMULATIVE_TRAVEL_TIME = (12,)
 
     # ==========================
@@ -47,7 +47,7 @@ class State(object):
 
         self.if_terminal = if_terminal
 
-        #HR - create CTT value
+        # HR - create CTT value
         self.cumulative_travel_time = cumulative_travel_time
 
         self.historical_traffic = None

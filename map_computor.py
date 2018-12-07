@@ -102,7 +102,7 @@ phases_light_7 = ["WNG_ESG_EWG_WEG_WSG_ENG", "NSG_NEG_SNG_SWG_NWG_SEG"]
 #NSG_NEG_SNG_SWG_NWG_SEG = "gGGG grrr gGGG grrr".replace(" ", "")
 #controlSignal = (WNG_ESG_EWG_WEG_WSG_ENG, NSG_NEG_SNG_SWG_NWG_SEG)
 
-#HR - nema phase
+# HR - nema phase
 # N E S W
 WNG_WSG_ESG_ENG_NWG_SEG = "grrr grrG grrr grrG".replace(" ", "")
 WEG_WSG_EWG_ENG_NWG_SEG = "grrr gGGr grrr gGGr".replace(" ", "")
@@ -125,7 +125,7 @@ output:
 
 def start_sumo(sumo_cmd_str):
     traci.start(sumo_cmd_str)
-    #HR - set the initial signal as WE thru
+    # HR - set the initial signal as WE thru
     traci.trafficlights.setRedYellowGreenState(node_light_7, controlSignal[0])
     for i in range(20):
         traci.simulationStep()
@@ -260,7 +260,7 @@ def changeTrafficLight_7(current_phase=0):  # [WNG_ESG_WSG_ENG_NWG_SEG]
     traci.trafficlights.setRedYellowGreenState(node_light_7, controlSignal[next_phase])
     return next_phase, next_phase_time_eclipsed
 
-#HR - Do not keep the phase sequence
+# HR - Do not keep the phase sequence
 def changeTrafficLight_7_HR(action=0):
 
     next_phase = action
@@ -359,7 +359,7 @@ def log_rewards(vehicle_dict, action, rewards_info_dict, file_name, timestamp, r
                        "WaitingTime1-0,WaitingTime0-1,WaitingTime2-0,WaitingTime0-2," \
                        "WaitingTime3-0,WaitingTime0-3,WaitingTime4-0,WaitingTime0-4," \
                        "CTT1-0,CTT2-0,CTT3-0,CTT4-0" + '\n'"""
-#HR - function to print outputs
+# HR - function to print outputs
 def log_outputs(vehicle_dict, current_phase, current_phase_duration, timestamp, file_name):
 
     listApproach1_0 = ['edge1-0_0', 'edge1-0_1']
@@ -438,7 +438,7 @@ def get_rewards_from_sumo(vehicle_dict, action, rewards_info_dict,
     reward_detail_dict['duration'].append(get_travel_time_duration(vehicle_dict, vehicle_id_entering_list))
     reward_detail_dict['flickering'].append(get_flickering(action))
     reward_detail_dict['partial_duration'].append(get_partial_travel_time_duration(vehicle_dict, vehicle_id_entering_list))
-    #HR - add CTT value to the reward
+    # HR - add CTT value to the reward
     reward_detail_dict['cumulative_travel_time'].append(get_overall_CTT(vehicle_dict, listLanes))
     vehicle_id_list = traci.vehicle.getIDList()
     reward_detail_dict['num_of_vehicles_in_system'] = [False, 0, len(vehicle_id_list)]
@@ -681,7 +681,7 @@ def set_yellow(dic_vehicles,rewards_info_dict,f_log_rewards,f_log_outputs,curren
         timestamp = traci.simulation.getCurrentTime() / 1000
         traci.trafficlights.setRedYellowGreenState(node_id, Yellow)
         traci.simulationStep()
-        #HR - change
+        # HR - change
 #        log_rewards(dic_vehicles, 0, rewards_info_dict, f_log_rewards, timestamp, rewards_detail_dict_list)
         log_outputs(dic_vehicles, current_phase, current_phase_duration, timestamp, f_log_outputs)
         update_vehicles_state(dic_vehicles)
@@ -710,22 +710,22 @@ def run(action, current_phase, current_phase_duration, vehicle_dict, rewards_inf
     traci.simulationStep()
     log_rewards(vehicle_dict, action, rewards_info_dict, f_log_rewards, timestamp, rewards_detail_dict_list)
 
-    #HR -
+    # HR -
     log_outputs(vehicle_dict, current_phase, current_phase_duration, timestamp, f_log_outputs)
     vehicle_dict = update_vehicles_state(vehicle_dict)
     return return_phase, return_phase_duration+1, vehicle_dict
 """
 
-#HR-Change
+# HR-Change
 def run(action, current_phase, current_phase_duration, vehicle_dict, rewards_info_dict, f_log_rewards, f_log_outputs, rewards_detail_dict_list,node_id="node0"):
     return_phase = current_phase
     return_phase_duration = current_phase_duration
     if action == 1:
         set_yellow(vehicle_dict, rewards_info_dict, f_log_rewards, f_log_outputs, current_phase, current_phase_duration, rewards_detail_dict_list,node_id=node_id)
         # set_all_red(vehicle_dict, rewards_info_dict, f_log_rewards, f_log_outputs, current_phase, current_phase_duration, rewards_detail_dict_list,node_id=node_id)
-        #HR - keep sequence
+        # HR - keep sequence
         return_phase, _ = changeTrafficLight_7(current_phase=current_phase)  # change traffic light in SUMO according to actionToPerform
-        #HR - No sequence
+        # HR - No sequence
         #return_phase, _ = changeTrafficLight_7_HR(action=action)
         return_phase_duration = 0
 
@@ -733,7 +733,7 @@ def run(action, current_phase, current_phase_duration, vehicle_dict, rewards_inf
     traci.simulationStep()
     log_rewards(vehicle_dict, action, rewards_info_dict, f_log_rewards, timestamp, rewards_detail_dict_list)
 
-    #HR -
+    # HR -
     log_outputs(vehicle_dict, return_phase, return_phase_duration+1, timestamp, f_log_outputs)
     vehicle_dict = update_vehicles_state(vehicle_dict)
     return return_phase, return_phase_duration+1, vehicle_dict

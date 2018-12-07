@@ -198,7 +198,7 @@ class TrafficLightDQN:
             state = self.agent.get_state(state, current_time)
 
 
-            #HR- Changed
+            # HR- Changed
             if if_pretrain:
                 _, q_values = self.agent.choose(count=current_time, if_pretrain=if_pretrain)
                 if state.time_this_phase[0][0] < phase_time_now[state.cur_phase[0][0]]:
