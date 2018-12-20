@@ -334,9 +334,10 @@ def restrict_reward(reward,func="unstrict"):
     return reward
 
 
-def log_rewards(vehicle_dict, action, rewards_info_dict, file_name, timestamp, rewards_detail_dict_list):
+def log_rewards(vehicle_dict, action, current_phase, rewards_info_dict, file_name, timestamp, rewards_detail_dict_list):
 
-    reward, reward_detail_dict = get_rewards_from_sumo(vehicle_dict, action, rewards_info_dict)
+    reward, reward_detail_dict = get_rewards_from_sumo(vehicle_dict, action, current_phase, rewards_info_dict)
+    reward_detail_dict_lane = get_rewards_from_sumo_lane_level(vehicle_dict, action, current_phase, rewards_info_dict)
     list_reward_keys = np.sort(list(reward_detail_dict.keys()))
     reward_str = "{0}, {1}".format(timestamp, action)
     for reward_key in list_reward_keys:
@@ -422,7 +423,7 @@ def log_outputs(vehicle_dict, current_phase, current_phase_duration, timestamp, 
     fp.write(output_str)
     fp.close()
 
-def get_rewards_from_sumo(vehicle_dict, action, rewards_info_dict,
+def get_rewards_from_sumo(vehicle_dict, action, current_phase, rewards_info_dict,
                           listLanes=['edge1-0_0','edge1-0_1','edge1-0_2','edge2-0_0','edge2-0_1','edge2-0_2',
                                  'edge3-0_0','edge3-0_1','edge3-0_2','edge4-0_0','edge4-0_1','edge4-0_2']):
     reward = 0
@@ -436,10 +437,12 @@ def get_rewards_from_sumo(vehicle_dict, action, rewards_info_dict,
     reward_detail_dict['delay'].append(get_overall_delay(listLanes))
     reward_detail_dict['emergency'].append(get_num_of_emergency_stops(vehicle_dict))
     reward_detail_dict['duration'].append(get_travel_time_duration(vehicle_dict, vehicle_id_entering_list))
-    reward_detail_dict['flickering'].append(get_flickering(action))
+    reward_detail_dict['flickering'].append(get_flickering(action, current_phase))
     reward_detail_dict['partial_duration'].append(get_partial_travel_time_duration(vehicle_dict, vehicle_id_entering_list))
     # HR - add CTT value to the reward
     reward_detail_dict['cumulative_travel_time'].append(get_overall_CTT(vehicle_dict, listLanes))
+    # HR - add SWC value to the reward
+    reward_detail_dict['num_of_signal_waiting'].append(get_overall_SWC(vehicle_dict, listLanes))
     vehicle_id_list = traci.vehicle.getIDList()
     reward_detail_dict['num_of_vehicles_in_system'] = [False, 0, len(vehicle_id_list)]
 
@@ -458,6 +461,39 @@ def get_rewards_from_sumo(vehicle_dict, action, rewards_info_dict,
             reward += v[1]*v[2]
     reward = restrict_reward(reward)#,func="linear")
     return reward, reward_detail_dict
+
+
+# HR - Lane level reward
+def get_rewards_from_sumo_lane_level(vehicle_dict, action, current_phase, rewards_info_dict,
+                          listLanes=['edge1-0_0','edge1-0_1','edge1-0_2','edge2-0_0','edge2-0_1','edge2-0_2',
+                                 'edge3-0_0','edge3-0_1','edge3-0_2','edge4-0_0','edge4-0_1','edge4-0_2']):
+    reward = 0
+    import copy
+    reward_detail_dict = copy.deepcopy(rewards_info_dict)
+
+    vehicle_id_entering_list = get_vehicle_id_entering()
+    for lane in listLanes:
+        reward_detail_dict['queue_length'].append(get_overall_queue_length(lane))
+        reward_detail_dict['wait_time'].append(get_overall_waiting_time(lane))
+        reward_detail_dict['delay'].append(get_overall_delay(lane))
+        # HR - add CTT value to the reward
+        reward_detail_dict['cumulative_travel_time'].append(get_overall_CTT(vehicle_dict, lane))
+        # HR - add SWC value to the reward
+        reward_detail_dict['num_of_signal_waiting'].append(get_overall_SWC(vehicle_dict, lane))
+
+    vehicle_id_list = traci.vehicle.getIDList()
+    reward_detail_dict['num_of_vehicles_in_system'] = [False, 0, len(vehicle_id_list)]
+
+    reward_detail_dict['num_of_vehicles_at_entering'] = [False, 0, len(vehicle_id_entering_list)]
+
+    vehicle_id_leaving = get_vehicle_id_leaving(vehicle_dict)
+
+    reward_detail_dict['num_of_vehicles_left'].append(len(vehicle_id_leaving))
+    reward_detail_dict['duration_of_vehicles_left'].append(
+        get_travel_time_duration(vehicle_dict, vehicle_id_leaving))
+
+    return reward_detail_dict
+
 
 def get_rewards_from_dict_list(rewards_detail_dict_list):
     reward = 0
@@ -511,14 +547,25 @@ def get_overall_CTT(rewards_detail_dict_list, listLanes):
                 overall_CTT += (traci.simulation.getCurrentTime()/1000 - veh.enter_time) / 60.0
     return overall_CTT
 
+
+def get_overall_SWC(rewards_detail_dict_list, listLanes):
+    overall_SWC = 0
+    for lane in listLanes:
+        for vID in traci.lane.getLastStepVehicleIDs(str(lane)):
+            veh = rewards_detail_dict_list.get(vID)
+            if veh:
+                overall_SWC += rewards_detail_dict_list[vID].signal_wait_count
+
+    return overall_SWC
+
 def get_overall_delay(listLanes):
     overall_delay = 0
     for lane in listLanes:
         overall_delay += 1 - traci.lane.getLastStepMeanSpeed(str(lane)) / traci.lane.getMaxSpeed(str(lane))
     return overall_delay
 
-def get_flickering(action):
-    return action
+def get_flickering(action, current_phase):
+    return action != current_phase
 
 # calculate number of emergency stops by vehicle
 def get_num_of_emergency_stops(vehicle_dict):
@@ -595,6 +642,8 @@ def status_calculator(dic_vehicles='false'):
     laneWaitingTracker=[]
     # HR - CTT
     laneCTTTracker=[]
+    # HR - Number of signal waiting count
+    laneNumSignalWaitTracker=[]
     #================= COUNT HALTED VEHICLES (I.E. QUEUE SIZE) (12 elements)
     for lane in listLanes:
         laneQueueTracker.append(traci.lane.getLastStepHaltingNumber(lane))
@@ -619,7 +668,16 @@ def status_calculator(dic_vehicles='false'):
                 overall_CTT += (traci.simulation.getCurrentTime()/1000 - veh.enter_time) / 60
         laneCTTTracker.append(overall_CTT)
 
-    return [laneQueueTracker, laneNumVehiclesTracker, laneWaitingTracker, mapOfCars, laneCTTTracker]
+    # HR ================ number of signal waiting in lane
+    for lane in listLanes:
+        overall_SWC = 0
+        for vID in traci.lane.getLastStepVehicleIDs(str(lane)):
+            veh = dic_vehicles.get(vID)
+            if veh:
+                overall_SWC += dic_vehicles[vID].signal_wait_count
+        laneNumSignalWaitTracker.append(overall_SWC)
+
+    return [laneQueueTracker, laneNumVehiclesTracker, laneWaitingTracker, mapOfCars, laneCTTTracker, laneNumSignalWaitTracker]
 
 
 
@@ -696,6 +754,14 @@ def set_all_red(dic_vehicles,rewards_info_dict,f_log_rewards,f_log_outputs,curre
         log_outputs(dic_vehicles, current_phase, current_phase_duration, timestamp, f_log_outputs)
         update_vehicles_state(dic_vehicles)
 
+
+
+# HR - counting the number of signal waiting
+def increase_waiting_count(vehicle_dict):
+    for vehicle_id in vehicle_dict.keys():
+        if vehicle_dict[vehicle_id].first_stop_time > 0:
+            vehicle_dict[vehicle_id].signal_wait_count = math.pow((math.sqrt(vehicle_dict[vehicle_id].signal_wait_count) + 1), 2)
+
 # HR - Intellilight's original function
 """
 def run(action, current_phase, current_phase_duration, vehicle_dict, rewards_info_dict, f_log_rewards, f_log_outputs, rewards_detail_dict_list,node_id="node0"):
@@ -720,21 +786,32 @@ def run(action, current_phase, current_phase_duration, vehicle_dict, rewards_inf
 def run(action, current_phase, current_phase_duration, vehicle_dict, rewards_info_dict, f_log_rewards, f_log_outputs, rewards_detail_dict_list,node_id="node0"):
     return_phase = current_phase
     return_phase_duration = current_phase_duration
-    if action == 1:
+    #if action == 1:
+    if action != current_phase:
+        increase_waiting_count(vehicle_dict)
         set_yellow(vehicle_dict, rewards_info_dict, f_log_rewards, f_log_outputs, current_phase, current_phase_duration, rewards_detail_dict_list,node_id=node_id)
         # set_all_red(vehicle_dict, rewards_info_dict, f_log_rewards, f_log_outputs, current_phase, current_phase_duration, rewards_detail_dict_list,node_id=node_id)
         # HR - keep sequence
-        return_phase, _ = changeTrafficLight_7(current_phase=current_phase)  # change traffic light in SUMO according to actionToPerform
+        #return_phase, _ = changeTrafficLight_7(current_phase=current_phase)  # change traffic light in SUMO according to actionToPerform
         # HR - No sequence
-        #return_phase, _ = changeTrafficLight_7_HR(action=action)
+        return_phase, _ = changeTrafficLight_7_HR(action=action)
         return_phase_duration = 0
+
+        for i in range(4):
+            timestamp = traci.simulation.getCurrentTime() / 1000
+            traci.simulationStep()
+            #log_rewards(vehicle_dict, action, rewards_info_dict, f_log_rewards, timestamp, rewards_detail_dict_list)
+
+            # HR -
+            log_outputs(vehicle_dict, return_phase, return_phase_duration+1, timestamp, f_log_outputs)
 
     timestamp = traci.simulation.getCurrentTime() / 1000
     traci.simulationStep()
-    log_rewards(vehicle_dict, action, rewards_info_dict, f_log_rewards, timestamp, rewards_detail_dict_list)
+    log_rewards(vehicle_dict, action, current_phase, rewards_info_dict, f_log_rewards, timestamp, rewards_detail_dict_list)
 
     # HR -
-    log_outputs(vehicle_dict, return_phase, return_phase_duration+1, timestamp, f_log_outputs)
+    log_outputs(vehicle_dict, return_phase, return_phase_duration + 1, timestamp, f_log_outputs)
+
     vehicle_dict = update_vehicles_state(vehicle_dict)
     return return_phase, return_phase_duration+1, vehicle_dict
 

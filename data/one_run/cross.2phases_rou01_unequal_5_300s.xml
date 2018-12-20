@@ -1,5 +1,5 @@
 <routes>
-
+    <!--
     <flow id="01" type="Car" begin="0" end="7200" number="600" from="edge1-0" to="edge0-2" departPos="1" departLane="best" departSpeed="5.0"/>
     <flow id="02" type="Car" begin="0" end="7200" number="600" from="edge2-0" to="edge0-1" departPos="2" departLane="best" departSpeed="5.0"/>
     <flow id="03" type="Car" begin="0" end="7200" number="300" from="edge3-0" to="edge0-4" departPos="3" departLane="best" departSpeed="5.0"/>
@@ -259,13 +259,13 @@
     <flow id="2914" type="Car" begin="136800" end="144000" number="60" from="edge3-0" to="edge0-2" departPos="3" departLane="best" departSpeed="5.0"/>
     <flow id="2915" type="Car" begin="136800" end="144000" number="60" from="edge4-0" to="edge0-1" departPos="4" departLane="best" departSpeed="5.0"/>
     <flow id="2916" type="Car" begin="136800" end="144000" number="60" from="edge4-0" to="edge0-2" departPos="4" departLane="best" departSpeed="5.0"/>
+    -->
 
 
 
 
 
 
-    <!--
     <flow id="01" type="Car" begin="0" end="7200" number="600" from="edge1-0" to="edge0-2" departPos="1" departLane="best" departSpeed="5.0"/>
     <flow id="02" type="Car" begin="0" end="7200" number="600" from="edge2-0" to="edge0-1" departPos="2" departLane="best" departSpeed="5.0"/>
     <flow id="03" type="Car" begin="0" end="7200" number="300" from="edge3-0" to="edge0-4" departPos="3" departLane="best" departSpeed="5.0"/>
@@ -395,7 +395,7 @@
     <flow id="914" type="Car" begin="64800" end="72000" number="60" from="edge3-0" to="edge0-2" departPos="3" departLane="best" departSpeed="5.0"/>
     <flow id="915" type="Car" begin="64800" end="72000" number="60" from="edge4-0" to="edge0-1" departPos="4" departLane="best" departSpeed="5.0"/>
     <flow id="916" type="Car" begin="64800" end="72000" number="60" from="edge4-0" to="edge0-2" departPos="4" departLane="best" departSpeed="5.0"/>
-    -->
+    
 
     <!--
     <flow id="01" type="Car" begin="0" end="72000" number="10000" from="edge1-0" to="edge0-2" departPos="1" departLane="best" departSpeed="5.0"/>

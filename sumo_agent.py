@@ -36,6 +36,7 @@ class Vehicles:
         self.has_read = False
         self.first_stop_time = -1
         self.entering = True
+        self.signal_wait_count = 0
 
 
 class SumoAgent:
@@ -145,7 +146,11 @@ class SumoAgent:
         current_phase_number = self.get_current_phase()
         rewards_detail_dict_list = []
         if (self.current_phase_duration < self.para_set.MIN_PHASE_TIME[current_phase_number]):
-            action = 0
+            #action = 0
+            action = current_phase_number
+        # HR - Max out
+        #if (self.current_phase_duration >= self.para_set.MAX_PHASE_TIME[current_phase_number]):
+        #    action = 1
 
         current_phase_number = self.get_current_phase()
         self.current_phase, self.current_phase_duration, self.vehicle_dict = map_computor.run(action=action,
@@ -197,7 +202,7 @@ class SumoAgent:
 
     def update_state(self, dic_vehicles='false'):
         status_tracker = map_computor.status_calculator(dic_vehicles=dic_vehicles)
-        # HR - Add CTT
+        # HR - Add CTT & SWC
         self.state = State(
             queue_length=np.reshape(np.array(status_tracker[0]), newshape=(1, 12)),
             num_of_vehicles=np.reshape(np.array(status_tracker[1]), newshape=(1, 12)),
@@ -208,6 +213,7 @@ class SumoAgent:
             time_this_phase=np.reshape(np.array([self.current_phase_duration]), newshape=(1, 1)),
             if_terminal=False,
             cumulative_travel_time=np.reshape(np.array(status_tracker[4]), newshape=(1, 12)),
+            num_of_signal_waiting=np.reshape(np.array(status_tracker[5]), newshape=(1, 12)),
         )
 
 

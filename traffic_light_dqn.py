@@ -81,7 +81,7 @@ class TrafficLightDQN:
 
         # HR-change num of phase
         self.agent = self.DIC_AGENTS[self.para_set.MODEL_NAME](num_phases=4,
-                                                               num_actions=2,
+                                                               num_actions=4,
                                                                path_set=self.path_set)
 
     def load_conf(self, conf_file):
@@ -185,8 +185,7 @@ class TrafficLightDQN:
                     if ind_phase_time >= len(phase_traffic_ratios):
                         break
 
-                    s_agent = SumoAgent(sumo_cmd_str,
-                            self.path_set)
+                    s_agent = SumoAgent(sumo_cmd_str, self.path_set)
                     current_time = s_agent.get_current_time()  # in seconds
 
                 phase_time_now = phase_traffic_ratios[ind_phase_time]
@@ -228,7 +227,7 @@ class TrafficLightDQN:
 
             # output to std out and file
             memory_str = 'time = %d;\taction = %d;\tcurrent_phase = %d;\tnext_phase = %d;\treward = %f;' \
-                         ';\t%s' \
+                         '\t%s' \
                          % (current_time, action,
                             state.cur_phase[0][0],
                             state.next_phase[0][0],

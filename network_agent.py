@@ -119,7 +119,7 @@ class NetworkAgent(Agent):
         ''' choose the best action for current state '''
 
         q_values = self.q_network.predict(self.convert_state_to_input(self.state))
-        print(q_values)
+        #print(q_values)
         if if_pretrain:
             self.action = np.argmax(q_values[0])
         else:

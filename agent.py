@@ -26,6 +26,8 @@ class State(object):
     D_HISTORICAL_TRAFFIC = (6,)
     # HR - Add CTT state
     D_CUMULATIVE_TRAVEL_TIME = (12,)
+    # HR - Add signal waiting count
+    D_NUM_OF_SIGNAL_WAITING = (12,)
 
     # ==========================
     def __init__(self,
@@ -34,7 +36,8 @@ class State(object):
                  next_phase,
                  time_this_phase,
                  if_terminal,
-                 cumulative_travel_time):
+                 cumulative_travel_time,
+                 num_of_signal_waiting):
 
         self.queue_length = queue_length
         self.num_of_vehicles = num_of_vehicles
@@ -49,6 +52,9 @@ class State(object):
 
         # HR - create CTT value
         self.cumulative_travel_time = cumulative_travel_time
+
+        # HR - create SWC value
+        self.num_of_signal_waiting = num_of_signal_waiting
 
         self.historical_traffic = None
 
