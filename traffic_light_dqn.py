@@ -226,12 +226,11 @@ class TrafficLightDQN:
 
 
             # output to std out and file
-            memory_str = 'time = %d;\taction = %d;\tcurrent_phase = %d;\tnext_phase = %d;\treward = %f;' \
-                         '\t%s' \
+            memory_str = 'T;%d;\tA;%d;\tCP;%d;\tNP;%d;\tR;%f;\tQ;%f;%f;%f;%f' \
                          % (current_time, action,
                             state.cur_phase[0][0],
                             state.next_phase[0][0],
-                            reward, repr(q_values))
+                            reward, q_values[0][0], q_values[0][1], q_values[0][2], q_values[0][3])
             print(memory_str)
             f_memory.write(memory_str + "\n")
             f_memory.close()

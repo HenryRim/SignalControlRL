@@ -104,10 +104,10 @@ phases_light_7 = ["WNG_ESG_EWG_WEG_WSG_ENG", "NSG_NEG_SNG_SWG_NWG_SEG"]
 
 # HR - nema phase
 # N E S W
-WNG_WSG_ESG_ENG_NWG_SEG = "grrr grrG grrr grrG".replace(" ", "")
-WEG_WSG_EWG_ENG_NWG_SEG = "grrr gGGr grrr gGGr".replace(" ", "")
-NEG_NWG_SWG_SEG_WSG_ENG = "grrG grrr grrG grrr".replace(" ", "")
-NSG_NWG_SNG_SEG_WSG_ENG = "gGGr grrr gGGr grrr".replace(" ", "")
+WNG_WSG_ESG_ENG_NWG_SEG = "grrr grrG grrr grrG".replace(" ", "")    # Phase 1
+WEG_WSG_EWG_ENG_NWG_SEG = "grrr gGGr grrr gGGr".replace(" ", "")    # Phase 2
+NEG_NWG_SWG_SEG_WSG_ENG = "grrG grrr grrG grrr".replace(" ", "")    # Phase 3
+NSG_NWG_SNG_SEG_WSG_ENG = "gGGr grrr gGGr grrr".replace(" ", "")    # Phase 4
 controlSignal = (WNG_WSG_ESG_ENG_NWG_SEG, WEG_WSG_EWG_ENG_NWG_SEG, NEG_NWG_SWG_SEG_WSG_ENG, NSG_NWG_SNG_SEG_WSG_ENG)
 
 listLanes=['edge1-0_0','edge1-0_1','edge1-0_2','edge2-0_0','edge2-0_1','edge2-0_2',
@@ -340,13 +340,23 @@ def log_rewards(vehicle_dict, action, current_phase, rewards_info_dict, file_nam
     reward_detail_dict_lane = get_rewards_from_sumo_lane_level(vehicle_dict, action, current_phase, rewards_info_dict)
     list_reward_keys = np.sort(list(reward_detail_dict.keys()))
     reward_str = "{0}, {1}".format(timestamp, action)
+    reward_str_lane = "{0}, {1}".format(timestamp, action)
     for reward_key in list_reward_keys:
         reward_str = reward_str + ", {0}".format(reward_detail_dict[reward_key][2])
     reward_str += '\n'
 
+    for reward_key in list_reward_keys:
+        for index in range(len(reward_detail_dict_lane[reward_key])-2):
+            reward_str_lane = reward_str_lane + ", {0}".format(reward_detail_dict_lane[reward_key][2+index])
+    reward_str_lane += '\n'
+
     fp = open(file_name, "a")
+    file_name_lane = file_name.replace(".txt", "")
+    fp_lane = open(file_name_lane + "_lane.txt", "a")
     fp.write(reward_str)
     fp.close()
+    fp_lane.write(reward_str_lane)
+    fp_lane.close()
     rewards_detail_dict_list.append(reward_detail_dict)
 
 
@@ -473,13 +483,13 @@ def get_rewards_from_sumo_lane_level(vehicle_dict, action, current_phase, reward
 
     vehicle_id_entering_list = get_vehicle_id_entering()
     for lane in listLanes:
-        reward_detail_dict['queue_length'].append(get_overall_queue_length(lane))
-        reward_detail_dict['wait_time'].append(get_overall_waiting_time(lane))
-        reward_detail_dict['delay'].append(get_overall_delay(lane))
+        reward_detail_dict['queue_length'].append(get_overall_queue_length_LL(lane))
+        reward_detail_dict['wait_time'].append(get_overall_waiting_time_LL(lane))
+        reward_detail_dict['delay'].append(get_overall_delay_LL(lane))
         # HR - add CTT value to the reward
-        reward_detail_dict['cumulative_travel_time'].append(get_overall_CTT(vehicle_dict, lane))
+        reward_detail_dict['cumulative_travel_time'].append(get_overall_CTT_LL(vehicle_dict, lane))
         # HR - add SWC value to the reward
-        reward_detail_dict['num_of_signal_waiting'].append(get_overall_SWC(vehicle_dict, lane))
+        reward_detail_dict['num_of_signal_waiting'].append(get_overall_SWC_LL(vehicle_dict, lane))
 
     vehicle_id_list = traci.vehicle.getIDList()
     reward_detail_dict['num_of_vehicles_in_system'] = [False, 0, len(vehicle_id_list)]
@@ -531,11 +541,26 @@ def get_overall_queue_length(listLanes):
         overall_queue_length += traci.lane.getLastStepHaltingNumber(lane)
     return overall_queue_length
 
+# HR - Lane level
+def get_overall_queue_length_LL(lane):
+    overall_queue_length = 0
+    overall_queue_length += traci.lane.getLastStepHaltingNumber(lane)
+    return overall_queue_length
+
+
 def get_overall_waiting_time(listLanes):
     overall_waiting_time = 0
     for lane in listLanes:
         overall_waiting_time += traci.lane.getWaitingTime(str(lane)) / 60.0
     return overall_waiting_time
+
+
+# HR - Lane level
+def get_overall_waiting_time_LL(lane):
+    overall_waiting_time = 0
+    overall_waiting_time += traci.lane.getWaitingTime(str(lane)) / 60.0
+    return overall_waiting_time
+
 
 # HR - Calculate CTT
 def get_overall_CTT(rewards_detail_dict_list, listLanes):
@@ -548,6 +573,16 @@ def get_overall_CTT(rewards_detail_dict_list, listLanes):
     return overall_CTT
 
 
+# HR - Calculate CTT lane level
+def get_overall_CTT_LL(rewards_detail_dict_list, lane):
+    overall_CTT = 0
+    for vID in traci.lane.getLastStepVehicleIDs(str(lane)):
+        veh = rewards_detail_dict_list.get(vID)
+        if veh:
+            overall_CTT += (traci.simulation.getCurrentTime()/1000 - veh.enter_time) / 60.0
+    return overall_CTT
+
+# HR - Calculate SWC
 def get_overall_SWC(rewards_detail_dict_list, listLanes):
     overall_SWC = 0
     for lane in listLanes:
@@ -558,11 +593,31 @@ def get_overall_SWC(rewards_detail_dict_list, listLanes):
 
     return overall_SWC
 
+
+# HR - Calculate SWC lane level
+def get_overall_SWC_LL(rewards_detail_dict_list, lane):
+    overall_SWC = 0
+    for vID in traci.lane.getLastStepVehicleIDs(str(lane)):
+        veh = rewards_detail_dict_list.get(vID)
+        if veh:
+            overall_SWC += rewards_detail_dict_list[vID].signal_wait_count
+
+    return overall_SWC
+
+
+# HR - Lane level
+def get_overall_delay_LL(lane):
+    overall_delay = 0
+    overall_delay += 1 - traci.lane.getLastStepMeanSpeed(str(lane)) / traci.lane.getMaxSpeed(str(lane))
+    return overall_delay
+
+
 def get_overall_delay(listLanes):
     overall_delay = 0
     for lane in listLanes:
         overall_delay += 1 - traci.lane.getLastStepMeanSpeed(str(lane)) / traci.lane.getMaxSpeed(str(lane))
     return overall_delay
+
 
 def get_flickering(action, current_phase):
     return action != current_phase

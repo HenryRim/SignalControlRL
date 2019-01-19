@@ -182,14 +182,11 @@ class NetworkAgent(Agent):
     def _get_next_estimated_reward(self, next_state):
 
         if self.para_set.DDQN:
-            a_max = np.argmax(self.q_network.predict(
-                self.convert_state_to_input(next_state))[0])
-            next_estimated_reward = self.q_network_bar.predict(
-                self.convert_state_to_input(next_state))[0][a_max]
+            a_max = np.argmax(self.q_network.predict(self.convert_state_to_input(next_state))[0])
+            next_estimated_reward = self.q_network_bar.predict(self.convert_state_to_input(next_state))[0][a_max]
             return next_estimated_reward
         else:
-            next_estimated_reward = np.max(self.q_network_bar.predict(
-                self.convert_state_to_input(next_state))[0])
+            next_estimated_reward = np.max(self.q_network_bar.predict(self.convert_state_to_input(next_state))[0])
             return next_estimated_reward
 
     def update_network_bar(self):
